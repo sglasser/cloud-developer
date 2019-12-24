@@ -6,15 +6,17 @@ import { TodoItem } from '../../models/TodoItem';
 import { getUserId } from '../../lambda/utils';
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  // TODO: Get all TODO items for a current user
-  const userId = getUserId(event);
 
-  console.log('userId', userId);
+  const userId = getUserId(event);
 
   const docClient = new DocumentClient();
 
-  const result = await docClient.scan({
-    TableName: process.env.TODOS_TABLE
+  const result = await docClient.query({
+    TableName: process.env.TODOS_TABLE,
+    KeyConditionExpression: 'userId = :u',
+    ExpressionAttributeValues: {
+      ':u': userId
+    }
   }).promise();
 
   const todos = result.Items as TodoItem[];

@@ -6,13 +6,14 @@ import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 
 import { getUserId } from '../../lambda/utils';
 import { TodoItem } from '../../models/TodoItem';
+import { uuid } from 'uuidv4'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
   const docClient = new DocumentClient();
 
   const userId = getUserId(event);
-  const todoId = new Date().getTime() + '';
+  const todoId = uuid();
   const createdAt = new Date().toDateString();
 
   const todo: TodoItem = {
@@ -23,21 +24,17 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     ...newTodo
    }
 
-   console.log('todo', todo);
-
-   console.log('table', process.env.TODOS_TABLE);
-
   await docClient.put({
     TableName: process.env.TODOS_TABLE,
     Item: todo
   }).promise();
 
   return {
-    statusCode: 200,
+    statusCode: 201,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     },
-    body: JSON.stringify(newTodo)
+    body: JSON.stringify(todo)
   }
 }

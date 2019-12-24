@@ -51,6 +51,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         name: this.state.newTodoName,
         dueDate
       })
+      console.log('newtodo', newTodo)
       this.setState({
         todos: [...this.state.todos, newTodo],
         newTodoName: ''
@@ -92,7 +93,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   async componentDidMount() {
     try {
       const todos = await getTodos(this.props.auth.getIdToken())
-      console.log('componentDidMount', todos)
       this.setState({
         todos,
         loadingTodos: false

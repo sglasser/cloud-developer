@@ -13,7 +13,8 @@ provider:
   region: ${opt:region, 'us-east-2'}
 
   environment:
-    TODOS_TABLE: TODOS-${self:provider.stage}
+    TODOS_TABLE: TODOS-V10-${self:provider.stage}
+    INDEX_NAME: USERID
     TODOS_S3_BUCKET: udacity-todos-${self:provider.stage}
   
   iamRoleStatements:
@@ -25,9 +26,16 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:Scan
+        - dynamodb:Query
         - dynamodb:PutItem
         - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/*
     - Effect: Allow
       Action:
         - s3:PutObject
@@ -107,9 +115,16 @@ resources:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
+          - AttributeName: todoId
+            AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
+          - AttributeName: todoId
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
+
+ 
+ 
  
