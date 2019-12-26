@@ -1,11 +1,7 @@
 import 'source-map-support/register'
-
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
-
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest';
-
 import { getUserId } from '../../lambda/utils';
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
