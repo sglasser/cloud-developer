@@ -1,22 +1,19 @@
-import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
-import 'source-map-support/register'
-
-import { verify, decode } from 'jsonwebtoken'
-import { createLogger } from '../../utils/logger'
-import Axios from 'axios'
-import { Jwt } from '../../auth/Jwt'
-import { JwtPayload } from '../../auth/JwtPayload'
+import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda';
+import 'source-map-support/register';
+import { verify, decode } from 'jsonwebtoken';
+import { createLogger } from '../../utils/logger';
+import { Jwt } from '../../auth/Jwt';
+import { JwtPayload } from '../../auth/JwtPayload';
+import cert from './auth0-cert';
 
 const logger = createLogger('auth')
-
-const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
 
 export const handler = async (
   event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
   logger.info('Authorizing a user', event.authorizationToken)
   try {
-    const jwtToken = await verifyToken(event.authorizationToken)
+    const jwtToken = await verifyToken(event.authorizationToken);
     logger.info('User was authorized', jwtToken)
 
     return {
@@ -34,7 +31,6 @@ export const handler = async (
     }
   } catch (e) {
     logger.error('User not authorized', { error: e.message })
-
     return {
       principalId: 'user',
       policyDocument: {
@@ -54,9 +50,10 @@ export const handler = async (
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
-
-  // TODO: Implement token verification
-  return undefined
+  if (verify(token, cert, {algorithms: ['RS256']})) {
+    return jwt.payload;
+  }
+  throw new Error('Token was invalid');
 }
 
 function getToken(authHeader: string): string {
