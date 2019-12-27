@@ -1,8 +1,11 @@
-import 'source-map-support/register'
+import 'source-map-support/register';
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest';
 import { getUserId } from '../../lambda/utils';
 import { Db } from '../../dynamodb/db';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('updateTodos');
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
@@ -12,6 +15,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
   await Db.getInstance().update(updatedTodo, userId, todoId);
 
+  logger.info(`Updated todo ${todoId} with `, updatedTodo);
+
   return {
     statusCode: 204,
     headers: {
@@ -19,5 +24,5 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: ''
-  }
+  };
 }
