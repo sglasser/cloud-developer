@@ -1,13 +1,18 @@
-import 'source-map-support/register'
+import 'source-map-support/register';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda';
 import { getUserId } from '../../lambda/utils';
 import { Db } from '../../dynamodb/db';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('getTodos');
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   const userId = getUserId(event);
 
   const todos = await Db.getInstance().getAll(userId);
+
+  logger.info('Retreived all todos for user', userId);
 
   return {
     statusCode: 200,
@@ -16,5 +21,5 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify(todos)
-  }
+  };
 }
